@@ -118,7 +118,7 @@ The split manifest is permanently locked in `ml/metadata/split_manifest_70_15_15
 ## 5. Preprocessing & Augmentation Pipeline
 
 ### Preprocessing (`ml/data/preprocessing.py`)
-- **Input Resolution**: $244 \times 244 \times 3$ (preserving baseline aspect balance) or canonical $224 \times 224 \times 3$.
+- **Input Resolution**: $384 \times 384 \times 3$ (production champion) and $244 \times 244 \times 3$ (ablation baseline).
 - **ImageNet Zero-Centering**: Converted from RGB to BGR and channel-subtracted using ImageNet empirical means:
   $$\mu_{\text{BGR}} = [103.939, 116.779, 123.680]$$
 
@@ -136,9 +136,9 @@ To prevent the model from memorizing mounting frame orientations and camera expo
 The core model architecture (`ml/models/vgg16.py`) utilizes the standard **VGG16** backbone initialized with pre-trained ImageNet weights:
 
 ```
-[Input: 244x244x3]
+[Input: 384x384x3]
        │
-[VGG16 Conv Backbone: Block1 to Block5]  <-- 14,714,688 Weights (Frozen)
+[VGG16 Conv Backbone: Block1 to Block5]  <-- 14,714,688 Weights (Block 5 Fine-Tuned)
        │
 [GlobalAveragePooling2D] (512-d feature vector)
        │
@@ -358,8 +358,8 @@ Locked test size:
                  │ HTTPS
                  ▼
 ┌─────────────────────────────────┐
-│     FastAPI Backend Engine      │  (Hosted on Hugging Face Spaces - Free CPU)
-│     Port: 7860                  │
+│     FastAPI Backend Engine      │  (Hosted on Lightning AI Studio - Free CPU)
+│     Port: 8000                  │
 └────────────────┬────────────────┘
                  │ Dynamic Shape Inference (384x384)
                  ▼
@@ -374,19 +374,24 @@ Locked test size:
 ```
 
 #### Manual Setup Instructions:
-1. **Hugging Face Spaces (FastAPI Backend)**:
-   - Create a free Space on [Hugging Face Spaces](https://huggingface.co/new-space).
-   - Select Space SDK: **Docker** (Blank).
-   - Connect your GitHub repository.
-   - Hugging Face automatically detects the root `Dockerfile`, builds the Python 3.10 CPU container, installs `requirements.txt`, loads `ml/models/best_vgg16.keras`, and starts the server on port 7860.
-   - Copy your live Space URL (e.g., `https://<username>-<spacename>.hf.space`).
+1. **Lightning AI Studio (FastAPI Backend)**:
+   - Launch a free CPU Studio (4 vCPU, 16 GB RAM) on [Lightning AI](https://lightning.ai/).
+   - Clone the repository and pull Git LFS model weights:
+     ```bash
+     git clone https://github.com/rithvikkaki/SolarSentinel-AI.git
+     cd SolarSentinel-AI
+     git lfs pull
+     pip install -r requirements.txt
+     python app.py
+     ```
+   - Expose port `8000` via the Studio Ports plugin to obtain the public HTTPS endpoint (e.g., `https://8000-01m4fyp6jp62zt2w4cfk9y9k41.cloudspaces.litng.ai`).
 
 2. **Vercel (React Frontend)**:
-   - Import your GitHub repository on [Vercel](https://vercel.com/new).
+   - Import the `SolarSentinel-AI` GitHub repository on [Vercel](https://vercel.com/new) (or deploy via `npx vercel --prod`).
    - Select Framework: **Vite**, Root Directory: `frontend`.
-   - Add Environment Variable:
-     - `VITE_API_URL` = `https://<username>-<spacename>.hf.space`
-   - Click **Deploy**. Vercel deploys the SPA with client rewrites handled by `vercel.json`.
+   - Set Environment Variable:
+     - `VITE_API_URL` = `https://8000-01m4fyp6jp62zt2w4cfk9y9k41.cloudspaces.litng.ai`
+   - Deploy (`https://solarsentinel-ai-seven.vercel.app`).
 
 ---
 
@@ -461,8 +466,8 @@ SolarSentinel-AI/
 │   └── screenshots/                  # Web demo, confusion matrix, & Grad-CAM figures
 ├── backend/                          # FastAPI REST API & model serving engine
 ├── frontend/                         # Lightweight React demo interface (Vite + Tailwind)
-├── app.py                            # Hugging Face Spaces & production server entrypoint
-├── Dockerfile                        # Hugging Face Spaces CPU deployment configuration
+├── app.py                            # Universal cloud & production server entrypoint
+├── Dockerfile                        # Universal cloud CPU container configuration
 ├── requirements.txt                  # Python dependencies
 └── README.md                         # Project documentation
 ```
@@ -470,4 +475,5 @@ SolarSentinel-AI/
 ---
 
 ## License & Citation
-Developed under MIT License for academic and industrial solar research.
+Developed under Apache-2.0 License for academic and industrial solar research.
+

@@ -93,7 +93,7 @@ export const SystemStatus: React.FC<SystemStatusProps> = ({ health, isLoading, o
           <div className="text-xs text-slate-400 space-y-1 font-mono">
             <div>Target Layer: block5_conv3</div>
             <div>Colormap: OpenCV JET</div>
-            <div>Resolution: 244×244 Baseline</div>
+            <div>Resolution: 384×384 High-Res</div>
           </div>
         </div>
       </div>

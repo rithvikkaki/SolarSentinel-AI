@@ -74,7 +74,8 @@ export interface ApiError {
 export interface ClassMetric {
   precision: number;
   recall: number;
-  f1_score: number;
+  f1_score?: number;
+  f1?: number;
   support: number;
 }
 
@@ -90,6 +91,8 @@ export interface ProductionModelIdentity {
   preprocessing_pipeline?: string;
   training_strategy?: string;
   held_out_test_samples?: number;
+  verified_validation_accuracy?: number;
+  verified_locked_test_accuracy?: number;
 }
 
 export interface ModelMetricsResponse {
@@ -99,14 +102,17 @@ export interface ModelMetricsResponse {
   input_dimensions: [number, number, number];
   test_evaluation?: {
     total_test_samples?: number;
+    validation_accuracy?: number;
     overall?: {
       accuracy: number;
       precision_macro: number;
       recall_macro: number;
-      f1_macro: number;
-      precision_weighted: number;
-      recall_weighted: number;
-      f1_weighted: number;
+      f1_macro?: number;
+      macro_f1?: number;
+      precision_weighted?: number;
+      recall_weighted?: number;
+      f1_weighted?: number;
+      weighted_f1?: number;
     };
     per_class?: Record<string, ClassMetric>;
   };
